@@ -628,6 +628,44 @@ int MicroBitBLEManager::advertiseEddystoneUid(const char* uid_namespace, const c
 #endif
 
 /**
+  * Set the content of iBeacon frames
+  *
+  * @param proximityUUID 16-byte proximity UUID
+  *
+  * @param major 2-byte major value
+  *
+  * @param minor 2-byte minor value
+  *
+  * @param calibratedPower the transmission range of the beacon (Defaults to: 0xF0 ~10m).
+  *
+  * @param interval the rate at which the micro:bit will advertise url frames. (Defaults to MICROBIT_BLE_EDDYSTONE_ADV_INTERVAL)
+  *
+  * @note The calibratedPower value ranges from -100 to +20 to a resolution of 1. The calibrated power should be binary encoded.
+  * More information can be found at https://github.com/google/eddystone/tree/master/eddystone-uid#tx-power
+  */
+int MicroBitBLEManager::advertiseIBeacon(const UUID &proximityUUID, int16_t major, int16_t minor, int8_t calibratedPower, uint16_t interval)
+{
+    int retVal = MICROBIT_OK;
+
+    ble->gap().stopAdvertising();
+    ble->clearAdvertisingPayload();
+
+    ble->setAdvertisingType(GapAdvertisingParams::ADV_NON_CONNECTABLE_UNDIRECTED);
+    ble->setAdvertisingInterval(interval);
+
+    ble->accumulateAdvertisingPayload(GapAdvertisingData::BREDR_NOT_SUPPORTED | GapAdvertisingData::LE_GENERAL_DISCOVERABLE);
+
+    retVal = MicroBitIBeacon::getInstance()->setParams(ble, proximityUUID, major, minor, calibratedPower);
+
+#if (MICROBIT_BLE_ADVERTISING_TIMEOUT > 0)
+    ble->gap().setAdvertisingTimeout(MICROBIT_BLE_ADVERTISING_TIMEOUT);
+#endif
+    ble->gap().startAdvertising();
+
+    return retVal;
+}
+
+/**
  * Enter pairing mode. This is mode is called to initiate pairing, and to enable FOTA programming
  * of the micro:bit in cases where BLE is disabled during normal operation.
  *
