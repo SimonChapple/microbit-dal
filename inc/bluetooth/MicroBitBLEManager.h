@@ -91,6 +91,13 @@ struct BLESysAttributeStore
     BLESysAttribute sys_attrs[MICROBIT_BLE_MAXIMUM_BONDS];
 };
 
+typedef enum
+{
+	BEACON_TYPE_NONE,
+	BEACON_TYPE_EDDYSTONE,
+	BEACON_TYPE_IBEACON
+}BLE_BEACON_TYPE;
+
 /**
   * Class definition for the MicroBitBLEManager.
   *
@@ -281,6 +288,24 @@ class MicroBitBLEManager : MicroBitComponent
       */
     int advertiseEddystoneUid(const char* uid_namespace, const char* uid_instance, int8_t calibratedPower = MICROBIT_BLE_EDDYSTONE_DEFAULT_POWER, bool connectable = true, uint16_t interval = MICROBIT_BLE_EDDYSTONE_ADV_INTERVAL);
 #endif
+
+    /**
+      * Set the content of Eddystone URL frames
+      *
+      * @param proximityUUID 16-byte proximity UUID
+      *
+      * @param major 2-byte major value
+      *
+      * @param minor 2-byte minor value
+      *
+      * @param calibratedPower the transmission range of the beacon (Defaults to: 0xF0 ~10m).
+      *
+      * @param interval the rate at which the micro:bit will advertise url frames. (Defaults to MICROBIT_BLE_EDDYSTONE_ADV_INTERVAL)
+      *
+      * @note The calibratedPower value ranges from -100 to +20 to a resolution of 1. The calibrated power should be binary encoded.
+      * More information can be found at https://github.com/google/eddystone/tree/master/eddystone-uid#tx-power
+      */
+    int advertiseIBeacon(const UUID &proximityUUID, int16_t major, int16_t minor, int8_t calibratedPower, uint16_t interval = MICROBIT_BLE_EDDYSTONE_ADV_INTERVAL);
 
   /**
    * Restarts in BLE Mode
